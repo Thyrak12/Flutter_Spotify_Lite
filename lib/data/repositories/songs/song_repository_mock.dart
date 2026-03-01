@@ -1,6 +1,6 @@
 // song_repository_mock.dart
 
-import '../../../model/song.dart';
+import '../../../model/songs/song.dart';
 import 'song_repository.dart';
 
 class SongRepositoryMock implements SongRepository {

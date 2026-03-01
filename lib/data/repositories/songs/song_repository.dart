@@ -1,4 +1,4 @@
-import '../../../model/song.dart';
+import '../../../model/songs/song.dart';
 
 abstract class SongRepository {
   List<Song> fetchSongs();

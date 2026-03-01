@@ -1,6 +1,6 @@
 // song_repository_remote.dart
  
-import '../../../model/song.dart';
+import '../../../model/songs/song.dart';
 import 'song_repository.dart';
 
 class SongRepositoryRemote implements SongRepository {
