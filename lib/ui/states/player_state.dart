@@ -1,18 +1,21 @@
 import 'package:flutter/widgets.dart';
-import 'package:spotify_lite/model/songs/song.dart';
+
+import '../../model/songs/song.dart';
 
 class PlayerState extends ChangeNotifier {
-  bool isPlayed = false;
-  Song? song;
+  Song? _currentSong;
 
-  void start(Song newSong) {
-    song = newSong;
-    isPlayed = true;
+  Song? get currentSong => _currentSong;
+
+  void start(Song song) {
+    _currentSong = song;
+
     notifyListeners();
   }
 
   void stop() {
-    isPlayed = false;
+    _currentSong = null;
+
     notifyListeners();
   }
 }

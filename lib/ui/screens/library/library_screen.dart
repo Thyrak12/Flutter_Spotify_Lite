@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:spotify_lite/ui/screens/library/view_model/library_view_model.dart';
+import 'package:spotify_lite/ui/screens/library/widgets/library_content.dart';
 
 import '../../../data/repositories/songs/song_repository.dart';
-import '../../../model/song.dart';
+import '../../../model/songs/song.dart';
+import '../../states/player_state.dart';
+import '../../states/settings_state.dart';
+import '../../theme/theme.dart';
 
 class LibraryScreen extends StatelessWidget {
   const LibraryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    SongRepository songRepository = context.read<SongRepository>();
-    List<Song> songs = songRepository.fetchSongs();
-
-    return Scaffold(
-      appBar: AppBar(title: Text("Library")),
-      body: ListView.builder(
-        itemCount: songs.length,
-        itemBuilder: (context, index) => Text(songs[index].title),
+    return ChangeNotifierProvider(
+      create: (context) => LibraryViewModel(
+        context.read<SongRepository>(),
+        context.read<PlayerState>(),
       ),
+      child: const LibraryContent(),
     );
   }
 }
