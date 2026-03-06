@@ -9,12 +9,13 @@ class LibraryViewModel extends ChangeNotifier {
   List<Song> _songs = [];
   final PlayerState _playerState;
 
-  LibraryViewModel(this._repository, this._playerState) {
+  LibraryViewModel(this._repository, this._playerState){
     init();
   }
 
   Future<void> init() async {
     _songs = _repository.fetchSongs();
+    _playerState.addListener(onPlayerStateChanged);
     notifyListeners();
   }
 
@@ -30,12 +31,10 @@ class LibraryViewModel extends ChangeNotifier {
 
   void play(Song song) {
     _playerState.start(song);
-    notifyListeners();
   }
 
   void stop() {
     _playerState.stop();
-    notifyListeners();
   }
 
   bool isPlaying(Song song) {
@@ -45,11 +44,15 @@ class LibraryViewModel extends ChangeNotifier {
   void tapSong(Song song) {
     if (_playerState.currentSong == song) {
       _playerState.stop();
-      notifyListeners();
     } else {
       _playerState.start(song);
-      notifyListeners();
     }
   }
+  
 
+  @override
+  void dispose() {
+    _playerState.removeListener(onPlayerStateChanged);
+    super.dispose();
+  }
 }
