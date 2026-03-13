@@ -55,11 +55,19 @@ class AsyncValue<T> {
   // Main constructor
   AsyncValue({this.data, this.error, required this.state});
 
-  factory AsyncValue.loading() => AsyncValue(state: AsyncValueState.loading);
+  // factory AsyncValue.loading() => AsyncValue(state: AsyncValueState.loading);
 
-  factory AsyncValue.success(T data) =>
-      AsyncValue(data: data, state: AsyncValueState.success);
+  // factory AsyncValue.success(T data) =>
+  //     AsyncValue(data: data, state: AsyncValueState.success);
 
-  factory AsyncValue.error(Object error) =>
-      AsyncValue(error: error, state: AsyncValueState.error);
+  // factory AsyncValue.error(Object error) =>
+  //     AsyncValue(error: error, state: AsyncValueState.error);
+
+  AsyncValue.loading(): data = null, error = null, state = AsyncValueState.loading;
+
+  AsyncValue.success(T this.data): error = null, state = AsyncValueState.success;
+
+  AsyncValue.error(Object this.error): data = null, state = AsyncValueState.error;
 }
+
+

@@ -22,7 +22,6 @@ class LibraryContent extends StatelessWidget {
       case AsyncValueState.error:
         content = Text(asyncValue.error.toString());
       case AsyncValueState.success:
-        List<Song> songs = asyncValue.data!;
         content = ListView.builder(
           itemCount: mv.songs.length,
           itemBuilder: (context, index) => SongTile(
