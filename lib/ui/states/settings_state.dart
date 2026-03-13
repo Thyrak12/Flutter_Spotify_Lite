@@ -9,10 +9,10 @@ class AppSettingsState extends ChangeNotifier {
   AppSettings? _appSettings;
 
   AppSettingsState({required this.repository}) {
-    init();
+    _init();
   }
 
-  Future<void> init() async {
+  Future<void> _init() async {
     _appSettings = await repository.load();
     notifyListeners();
   }

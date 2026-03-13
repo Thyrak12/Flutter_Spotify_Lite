@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+
 enum ThemeColor {
   blue(color: Color.fromARGB(255, 34, 118, 229)),
   green(color: Color.fromARGB(255, 229, 158, 221)),
@@ -8,7 +10,7 @@ enum ThemeColor {
   const ThemeColor({required this.color});
 
   final Color color;
-  Color get backgroundColor => color.withAlpha(50);
+  Color get backgroundColor => Color.lerp(color, Colors.white, 0.85)!;
 }
 
 class AppSettings {

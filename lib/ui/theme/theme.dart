@@ -45,9 +45,12 @@ class AppTextStyles {
     fontWeight: FontWeight.w500,
   );
 
-  static TextStyle body = TextStyle(fontSize: 30, fontWeight: FontWeight.w400);
+  static TextStyle title = TextStyle(fontSize: 20, fontWeight: FontWeight.w400, color: AppColors.textLight);
 
-  static TextStyle label = TextStyle(fontSize: 20, fontWeight: FontWeight.w400);
+  static TextStyle body = TextStyle(fontSize: 30, fontWeight: FontWeight.w400, color: AppColors.text);
+
+  static TextStyle label = TextStyle(fontSize: 20, fontWeight: FontWeight.w400, color: AppColors.text,
+  );
 }
 
 ///

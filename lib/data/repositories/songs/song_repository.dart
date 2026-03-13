@@ -1,7 +1,7 @@
 import '../../../model/songs/song.dart';
 
 abstract class SongRepository {
-  List<Song> fetchSongs();
+  Future<List<Song>> fetchSongs();
   
-  Song? fetchSongById(String id);
+  Future<Song?> fetchSongById(String id);
 }

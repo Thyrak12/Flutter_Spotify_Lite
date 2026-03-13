@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:spotify_lite/ui/screens/library/view_model/library_view_model.dart';
-
-import '../../../../data/repositories/songs/song_repository.dart';
-import '../../../../model/songs/song.dart';
-import '../../../states/player_state.dart';
-import '../../../states/settings_state.dart';
+import 'package:spotify_lite/model/songs/song.dart';
 import '../../../theme/theme.dart';
+import '../../../widgets/song/song_tile.dart';
+import '../view_model/library_view_model.dart';
 
 class LibraryContent extends StatelessWidget {
   const LibraryContent({super.key});
@@ -14,63 +11,41 @@ class LibraryContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // 1- Read the globbal song repository
-    final vm = context.watch<LibraryViewModel>();
+    LibraryViewModel mv = context.watch<LibraryViewModel>();
 
-    // 2- Read the globbal settings state
-    AppSettingsState settingsState = context.read<AppSettingsState>();
+    AsyncValue<List<Song>> asyncValue = mv.value;
+    Widget content;
+    switch (asyncValue.state) {
+      case AsyncValueState.loading:
+        content = CircularProgressIndicator();
+        break;
+      case AsyncValueState.error:
+        content = Text(asyncValue.error.toString());
+      case AsyncValueState.success:
+        List<Song> songs = asyncValue.data!;
+        content = ListView.builder(
+          itemCount: mv.songs.length,
+          itemBuilder: (context, index) => SongTile(
+            song: mv.songs[index],
+            isPlaying: mv.isSongPlaying(mv.songs[index]),
+            onTap: () {
+              mv.start(mv.songs[index]);
+            },
+          ),
+        );
+    }
 
-    // 3 - Watch the globbal player state
-    PlayerState playerState = context.watch<PlayerState>();
-
-    return Container(
-      color: settingsState.theme.backgroundColor,
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(height: 16),
           Text("Library", style: AppTextStyles.heading),
-
           SizedBox(height: 50),
 
-          Expanded(
-            child: ListView.builder(
-              itemCount: vm.songs.length,
-              itemBuilder: (context, index) {
-                final song = vm.songs[index];
-                return SongTile(
-                  song: song,
-                  isPlaying: vm.isPlaying(song),
-                  onTap: () => vm.tapSong(song),
-                );
-              },
-            ),
-          ),
+          Expanded(child: Center(child: content)),
         ],
-      ),
-    );
-  }
-}
-
-class SongTile extends StatelessWidget {
-  const SongTile({
-    super.key,
-    required this.song,
-    required this.isPlaying,
-    required this.onTap,
-  });
-
-  final Song song;
-  final bool isPlaying;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      onTap: onTap,
-      title: Text(song.title),
-      trailing: Text(
-        isPlaying ? "Playing" : "",
-        style: TextStyle(color: Colors.amber),
       ),
     );
   }

@@ -1,58 +1,65 @@
 import 'package:flutter/material.dart';
-import 'package:spotify_lite/data/repositories/songs/song_repository.dart';
-import 'package:spotify_lite/model/songs/song.dart';
-import 'package:spotify_lite/ui/states/player_state.dart';
+import '../../../../data/repositories/songs/song_repository.dart';
+import '../../../states/player_state.dart';
+import '../../../../model/songs/song.dart';
 
 class LibraryViewModel extends ChangeNotifier {
-  final SongRepository _repository;
+  final SongRepository songRepository;
+  final PlayerState playerState;
+  List<Song>? _songs;
 
-  List<Song> _songs = [];
-  final PlayerState _playerState;
+  AsyncValue<List<Song>> value = AsyncValue.loading();
 
-  LibraryViewModel(this._repository, this._playerState){
-    init();
+  LibraryViewModel({required this.songRepository, required this.playerState}) {
+    playerState.addListener(notifyListeners);
+
+    // init
+    _init();
   }
 
-  Future<void> init() async {
-    _songs = _repository.fetchSongs();
-    _playerState.addListener(onPlayerStateChanged);
-    notifyListeners();
-  }
-
-  void onPlayerStateChanged() {
-    notifyListeners();
-  }
-
-  List<Song> get songs => _songs;
-
-  PlayerState? get playerState => _playerState;
-
-  Song? get currentSong => _playerState.currentSong;
-
-  void play(Song song) {
-    _playerState.start(song);
-  }
-
-  void stop() {
-    _playerState.stop();
-  }
-
-  bool isPlaying(Song song) {
-    return _playerState.currentSong == song;
-  }
-
-  void tapSong(Song song) {
-    if (_playerState.currentSong == song) {
-      _playerState.stop();
-    } else {
-      _playerState.start(song);
-    }
-  }
-  
+  List<Song> get songs => _songs == null ? [] : _songs!;
 
   @override
   void dispose() {
-    _playerState.removeListener(onPlayerStateChanged);
+    playerState.removeListener(notifyListeners);
     super.dispose();
   }
+
+  void _init() async {
+    value = AsyncValue.loading();
+    notifyListeners();
+    // 1 - Fetch songs
+
+    try {
+      _songs = await songRepository.fetchSongs();
+      value = AsyncValue.success(_songs!);
+    } catch (e) {
+      value = AsyncValue.error(e);
+    } // 2 - notify listeners
+    notifyListeners();
+  }
+
+  bool isSongPlaying(Song song) => playerState.currentSong == song;
+
+  void start(Song song) => playerState.start(song);
+  void stop(Song song) => playerState.stop();
+}
+
+enum AsyncValueState { loading, success, error }
+
+class AsyncValue<T> {
+  final T? data;
+  final Object? error;
+  final AsyncValueState state;
+
+  // Main constructor
+  AsyncValue({this.data, this.error, required this.state});
+
+  factory AsyncValue.loading() => AsyncValue(state: AsyncValueState.loading);
+
+  factory AsyncValue.success(T data) =>
+      AsyncValue(data: data, state: AsyncValueState.success);
+
+  factory AsyncValue.error(Object error) =>
+      AsyncValue(error: error, state: AsyncValueState.error);
 }
