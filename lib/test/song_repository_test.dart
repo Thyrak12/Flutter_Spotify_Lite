@@ -1,10 +1,14 @@
- 
+import '../data/repositories/songs/song_repository.dart';
+import '../data/repositories/songs/song_repository_firebase.dart';
+import '../model/songs/song.dart';
+
 void main() async {
   //   Instantiate the  song_repository_mock
- 
-  // Test both the success and the failure of the post request
- 
-  // Handle the Future using 2 ways  (2 tests)
-  // - Using then() with .catchError().
-  // - Using async/await with try/catch.
+  SongRepository songRepository = SongRepositoryFirebase();
+
+  List<Song> songs = await songRepository.fetchSongs();
+
+  for (var song in songs) {
+    print(song);
+  }
 }

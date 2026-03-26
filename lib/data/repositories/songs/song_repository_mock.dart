@@ -1,7 +1,5 @@
 // song_repository_mock.dart
 
-import 'package:flutter/services.dart';
-
 import '../../../model/songs/song.dart';
 import 'song_repository.dart';
 
@@ -40,26 +38,19 @@ class SongRepositoryMock implements SongRepository {
   ];
 
   @override
-  int times = 0;
   Future<List<Song>> fetchSongs() async {
-    await Future.delayed(Duration(seconds: 2), () {
-      times++;
-      if (times % 2 == 0) {
-        throw Exception("Error Every 2 time refresh !!!!");
-      }
+    return Future.delayed(Duration(seconds: 4), () {
+      throw Exception("G3 and G4 the class is finished");
     });
-
-    return _songs;
   }
 
   @override
   Future<Song?> fetchSongById(String id) async {
-    // - Simulate a delay of 3 seconds.
-
-    // - After the delay : Find the song of given id in the list of songs and return it
-
-    // - If not found : Throw an error with the message “no song found for id 25 in the database"
-
-    return Future.delayed(Duration.zero); // TO CHANGE !
+    return Future.delayed(Duration(seconds: 4), () {
+      return _songs.firstWhere(
+        (song) => song.id == id,
+        orElse: () => throw Exception("No song with id $id in the database"),
+      );
+    });
   }
 }
