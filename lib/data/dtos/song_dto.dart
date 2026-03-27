@@ -9,9 +9,9 @@ class SongDto {
 
   static Song fromJson(Map<String, dynamic> json) {
     final id = json[idKey] as String?;
-    final title = (json[titleKey] ?? json['name']) as String?;
-    final artist = (json[artistKey] ?? json['artist'] ?? json['artists']) as String?;
-    final durationMs = (json[durationKey] ?? json['durationMs']) as int?;
+    final title = json[titleKey] as String?;
+    final artist = json[artistKey] as String?;
+    final durationMs = json[durationKey] as int?;
     final imageUrl = json[imageUriKey] as String?;
 
     if (id == null || title == null || artist == null || durationMs == null || imageUrl == null) {
