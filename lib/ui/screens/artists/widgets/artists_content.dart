@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import '../../../../model/artists/artist.dart';
+ 
+import '../../../../model/artist/artist.dart';
 import '../../../theme/theme.dart';
 import '../../../utils/async_value.dart';
-import '../../../widgets/artist/artist_tile.dart';
+import '../../../widgets/song/artist_tile.dart';
 import '../view_model/artists_view_model.dart';
 
 class ArtistsContent extends StatelessWidget {
@@ -12,29 +12,30 @@ class ArtistsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mv = context.watch<ArtistsViewModel>();
-    final asyncValue = mv.artistsValue;
+    // 1- Read the globbal song repository
+    ArtistsViewModel mv = context.watch<ArtistsViewModel>();
+
+    AsyncValue<List<Artist>> asyncValue = mv.artistsValue;
 
     Widget content;
     switch (asyncValue.state) {
       case AsyncValueState.loading:
-        content = const Center(child: CircularProgressIndicator());
+        content = Center(child: CircularProgressIndicator());
         break;
       case AsyncValueState.error:
         content = Center(
           child: Text(
             'error = ${asyncValue.error!}',
-            style: const TextStyle(color: Colors.red),
+            style: TextStyle(color: Colors.red),
           ),
         );
-        break;
+
       case AsyncValueState.success:
-        final List<Artist> artists = asyncValue.data!;
+        List<Artist> artists = asyncValue.data!;
         content = ListView.builder(
           itemCount: artists.length,
           itemBuilder: (context, index) => ArtistTile(artist: artists[index]),
         );
-        break;
     }
 
     return Padding(
@@ -42,9 +43,10 @@ class ArtistsContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const SizedBox(height: 16),
-          Text('Artists', style: AppTextStyles.heading),
-          const SizedBox(height: 50),
+          SizedBox(height: 16),
+          Text("Library", style: AppTextStyles.heading),
+          SizedBox(height: 50),
+
           Expanded(child: content),
         ],
       ),

@@ -1,29 +1,28 @@
 import '../../model/songs/song.dart';
 
 class SongDto {
-  static const String idKey = 'id';
   static const String titleKey = 'title';
-  static const String artistKey = 'artistId';
   static const String durationKey = 'duration'; // in ms
-  static const String imageUriKey = 'imageUrl';
+  static const String artistIdKey = 'artistId';
+  static const String imageUrlKey = 'imageUrl';
+  static const String likesKey = 'likes';
 
-  static Song fromJson(Map<String, dynamic> json) {
-    final id = json[idKey] as String?;
-    final title = json[titleKey] as String?;
-    final artist = json[artistKey] as String?;
-    final durationMs = json[durationKey] as int?;
-    final imageUrl = json[imageUriKey] as String?;
+  static Song fromJson(String id, Map<String, dynamic> json) {
+    assert(json[titleKey] is String);
+    assert(json[durationKey] is int);
+    assert(json[artistIdKey] is String);
+    assert(json[imageUrlKey] is String);
+    assert(json[likesKey] == null || json[likesKey] is int);
 
-    if (id == null || title == null || artist == null || durationMs == null || imageUrl == null) {
-      throw const FormatException('Invalid song payload');
-    }
+    final dynamic likesJson = json[likesKey];
 
     return Song(
       id: id,
-      title: title,
-      artist: artist,
-      duration: Duration(milliseconds: durationMs),
-      imageUri: Uri.parse(imageUrl),
+      title: json[titleKey],
+      artistId: json[artistIdKey],
+      duration: Duration(milliseconds: json[durationKey]),
+      imageUrl: Uri.parse(json[imageUrlKey]),
+      likes: likesJson == null ? 0 : likesJson as int,
     );
   }
 
@@ -31,9 +30,10 @@ class SongDto {
   Map<String, dynamic> toJson(Song song) {
     return {
       titleKey: song.title,
-      artistKey: song.artist,
+      artistIdKey: song.artistId,
       durationKey: song.duration.inMilliseconds,
-      imageUriKey: song.imageUri.toString(),
+      imageUrlKey: song.imageUrl.toString(),
+      likesKey: song.likes,
     };
   }
 }

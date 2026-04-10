@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../../../../data/repositories/artists/artist_repository.dart';
-import '../../../../model/artists/artist.dart';
+import '../../../../data/repositories/artist/artist_repository.dart';
+import '../../../../model/artist/artist.dart';
 import '../../../utils/async_value.dart';
 
 class ArtistsViewModel extends ChangeNotifier {
@@ -18,16 +17,18 @@ class ArtistsViewModel extends ChangeNotifier {
   }
 
   void fetchArtists() async {
+    // 1- Loading state
     artistsValue = AsyncValue.loading();
     notifyListeners();
 
     try {
-      final artists = await artistRepository.fetchArtists();
+      // 2- Fetch is successfull
+      List<Artist> artists = await artistRepository.fetchArtists();
       artistsValue = AsyncValue.success(artists);
     } catch (e) {
+      // 3- Fetch is unsucessfull
       artistsValue = AsyncValue.error(e);
     }
-
     notifyListeners();
   }
 }

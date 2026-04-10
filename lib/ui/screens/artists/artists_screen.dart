@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import '../../../data/repositories/artists/artist_repository.dart';
+import '../../../data/repositories/artist/artist_repository.dart';
 import 'view_model/artists_view_model.dart';
 import 'widgets/artists_content.dart';
+
 
 class ArtistsScreen extends StatelessWidget {
   const ArtistsScreen({super.key});
@@ -14,7 +14,7 @@ class ArtistsScreen extends StatelessWidget {
       create: (context) => ArtistsViewModel(
         artistRepository: context.read<ArtistRepository>(),
       ),
-      child: const ArtistsContent(),
+      child: ArtistsContent(),
     );
   }
 }

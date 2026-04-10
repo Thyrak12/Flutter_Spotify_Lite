@@ -31,7 +31,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [LibraryScreen(), ArtistsScreen(), SettingsScreen()];
+  final List<Widget> _pages = [  LibraryScreen(), ArtistsScreen(), SettingsScreen()];
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +59,7 @@ class _MyAppState extends State<MyApp> {
               icon: Icon(Icons.library_music),
               label: 'Library',
             ),
-            BottomNavigationBarItem(
+             BottomNavigationBarItem(
               icon: Icon(Icons.person),
               label: 'Artists',
             ),
