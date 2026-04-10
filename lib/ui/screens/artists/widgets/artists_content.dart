@@ -10,6 +10,18 @@ import '../view_model/artists_view_model.dart';
 class ArtistsContent extends StatelessWidget {
   const ArtistsContent({super.key});
 
+  Widget _buildScrollableState(Widget child) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(
+          height: 420,
+          child: Center(child: child),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // 1- Read the globbal song repository
@@ -20,23 +32,31 @@ class ArtistsContent extends StatelessWidget {
     Widget content;
     switch (asyncValue.state) {
       case AsyncValueState.loading:
-        content = Center(child: CircularProgressIndicator());
+        content = _buildScrollableState(const CircularProgressIndicator());
         break;
       case AsyncValueState.error:
-        content = Center(
-          child: Text(
+        content = _buildScrollableState(
+          Text(
             'error = ${asyncValue.error!}',
             style: TextStyle(color: Colors.red),
           ),
         );
+        break;
 
       case AsyncValueState.success:
         List<Artist> artists = asyncValue.data!;
         content = ListView.builder(
+          physics: const AlwaysScrollableScrollPhysics(),
           itemCount: artists.length,
           itemBuilder: (context, index) => ArtistTile(artist: artists[index]),
         );
+        break;
     }
+
+    content = RefreshIndicator(
+      onRefresh: mv.refresh,
+      child: content,
+    );
 
     return Padding(
       padding: const EdgeInsets.all(20.0),

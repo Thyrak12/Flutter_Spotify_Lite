@@ -36,17 +36,17 @@ class LibraryViewModel extends ChangeNotifier {
     fetchSong();
   }
 
-  Future<void> fetchSong() async {
+  Future<void> fetchSong({bool forceFetch = false}) async {
     // 1- Loading state
     data = AsyncValue.loading();
     notifyListeners();
 
     try {
       // 1- Fetch songs
-      List<Song> songs = await songRepository.fetchSongs();
+      List<Song> songs = await songRepository.fetchSongs(forceFetch: forceFetch);
 
       // 2- Fethc artist
-      List<Artist> artists = await artistRepository.fetchArtists();
+      List<Artist> artists = await artistRepository.fetchArtists(forceFetch: forceFetch);
 
       // 3- Create the mapping artistid-> artist
       Map<String, Artist> mapArtist = {};
@@ -70,13 +70,49 @@ class LibraryViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> refresh() => fetchSong(forceFetch: true);
+
   bool isSongPlaying(Song song) => playerState.currentSong?.id == song.id;
 
   void start(Song song) => playerState.start(song);
   void stop(Song song) => playerState.stop();
 
   void likeSong(Song song) async {
-    await songRepository.likeSong(song.id);
-    await fetchSong();
+    if (data.state != AsyncValueState.success || data.data == null) {
+      return;
+    }
+
+    final List<LibraryItemData> currentData = data.data!;
+    final int songIndex = currentData.indexWhere((item) => item.song.id == song.id);
+
+    if (songIndex == -1) {
+      return;
+    }
+
+    final LibraryItemData currentItem = currentData[songIndex];
+    final Song currentSong = currentItem.song;
+
+    final Song likedSong = Song(
+      id: currentSong.id,
+      title: currentSong.title,
+      artistId: currentSong.artistId,
+      duration: currentSong.duration,
+      imageUrl: currentSong.imageUrl,
+      likes: currentSong.likes + 1,
+    );
+
+    final List<LibraryItemData> updatedData = List<LibraryItemData>.from(currentData);
+    updatedData[songIndex] = LibraryItemData(song: likedSong, artist: currentItem.artist);
+    data = AsyncValue.success(updatedData);
+    notifyListeners();
+
+    try {
+      await songRepository.likeSong(song.id);
+    } catch (_) {
+      final List<LibraryItemData> revertedData = List<LibraryItemData>.from(updatedData);
+      revertedData[songIndex] = LibraryItemData(song: currentSong, artist: currentItem.artist);
+      data = AsyncValue.success(revertedData);
+      notifyListeners();
+    }
   }
 }

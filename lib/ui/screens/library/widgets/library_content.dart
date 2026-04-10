@@ -9,13 +9,15 @@ import '../view_model/library_view_model.dart';
 class LibraryContent extends StatelessWidget {
   const LibraryContent({super.key});
 
-  Widget _buildEmptyState(String message) {
-    return Center(
-      child: Text(
-        message,
-        style: TextStyle(color: Colors.grey.shade700),
-        textAlign: TextAlign.center,
-      ),
+  Widget _buildScrollableState(Widget child) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(
+          height: 420,
+          child: Center(child: child),
+        ),
+      ],
     );
   }
 
@@ -29,20 +31,33 @@ class LibraryContent extends StatelessWidget {
     Widget content;
     switch (asyncValue.state) {
       case AsyncValueState.loading:
-        content = const Center(child: CircularProgressIndicator());
+        content = _buildScrollableState(const CircularProgressIndicator());
         break;
       case AsyncValueState.error:
-        content = _buildEmptyState('Unable to load library\n${asyncValue.error}');
+        content = _buildScrollableState(
+          Text(
+            'Unable to load library\n${asyncValue.error}',
+            style: TextStyle(color: Colors.grey.shade700),
+            textAlign: TextAlign.center,
+          ),
+        );
         break;
 
       case AsyncValueState.success:
         List<LibraryItemData> data = asyncValue.data!;
         if (data.isEmpty) {
-          content = _buildEmptyState('No songs found in your library.');
+          content = _buildScrollableState(
+            Text(
+              'No songs found in your library.',
+              style: TextStyle(color: Colors.grey.shade700),
+              textAlign: TextAlign.center,
+            ),
+          );
           break;
         }
 
         content = ListView.builder(
+          physics: const AlwaysScrollableScrollPhysics(),
           itemCount: data.length,
           itemBuilder: (context, index) => LibraryItemTile(
             data: data[index],
@@ -59,6 +74,11 @@ class LibraryContent extends StatelessWidget {
         );
         break;
     }
+
+    content = RefreshIndicator(
+      onRefresh: mv.refresh,
+      child: content,
+    );
 
     return Padding(
       padding: const EdgeInsets.all(20.0),

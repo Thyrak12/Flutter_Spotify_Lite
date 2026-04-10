@@ -5,14 +5,14 @@ class ArtistRepositoryMock implements ArtistRepository {
   final List<Artist> _artists = [];
 
   @override
-  Future<List<Artist>> fetchArtists() async {
+  Future<List<Artist>> fetchArtists({bool forceFetch = false}) async {
     return Future.delayed(Duration(seconds: 4), () {
       throw _artists;
     });
   }
 
   @override
-  Future<Artist?> fetchArtistById(String id) async {
+  Future<Artist?> fetchArtistById(String id, {bool forceFetch = false}) async {
     return Future.delayed(Duration(seconds: 4), () {
       return _artists.firstWhere(
         (artist) => artist.id == id,

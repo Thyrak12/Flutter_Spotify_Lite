@@ -7,14 +7,14 @@ class SongRepositoryMock implements SongRepository {
   final List<Song> _songs = [];
 
   @override
-  Future<List<Song>> fetchSongs() async {
+  Future<List<Song>> fetchSongs({bool forceFetch = false}) async {
     return Future.delayed(Duration(seconds: 4), () {
       throw _songs;
     });
   }
 
   @override
-  Future<Song?> fetchSongById(String id) async {
+  Future<Song?> fetchSongById(String id, {bool forceFetch = false}) async {
     return Future.delayed(Duration(seconds: 4), () {
       return _songs.firstWhere(
         (song) => song.id == id,

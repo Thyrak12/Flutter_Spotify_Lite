@@ -7,20 +7,27 @@ import 'song_repository.dart';
 
 class SongRepositoryFirebase extends SongRepository {
   final String _baseHost = 'thyrak-test-default-rtdb.firebaseio.com';
+  List<Song>? _cachedSongs;
 
   Uri _songsUri() => Uri.https(_baseHost, '/songs.json');
   Uri _songUri(String id) => Uri.https(_baseHost, '/songs/$id.json');
 
   @override
-  Future<List<Song>> fetchSongs() async {
+  Future<List<Song>> fetchSongs({bool forceFetch = false}) async {
+    if (!forceFetch && _cachedSongs != null) {
+      return _cachedSongs!;
+    }
+
     final http.Response response = await http.get(_songsUri());
 
     if (response.statusCode == 200) {
+      final dynamic decodedJson = json.decode(response.body);
       final Map<String, dynamic> songJson =
-          json.decode(response.body) as Map<String, dynamic>;
+          decodedJson == null ? <String, dynamic>{} : decodedJson as Map<String, dynamic>;
 
       if (songJson.isEmpty) {
-        return [];
+        _cachedSongs = [];
+        return _cachedSongs!;
       }
 
       final List<Song> result = [];
@@ -29,6 +36,7 @@ class SongRepositoryFirebase extends SongRepository {
         result.add(SongDto.fromJson(entry.key, entry.value));
       }
 
+      _cachedSongs = result;
       return result;
     } else {
       throw Exception('Failed to load songs (status: ${response.statusCode})');
@@ -36,7 +44,15 @@ class SongRepositoryFirebase extends SongRepository {
   }
 
   @override
-  Future<Song?> fetchSongById(String id) async {
+  Future<Song?> fetchSongById(String id, {bool forceFetch = false}) async {
+    if (!forceFetch && _cachedSongs != null) {
+      for (final Song song in _cachedSongs!) {
+        if (song.id == id) {
+          return song;
+        }
+      }
+    }
+
     final http.Response response = await http.get(_songUri(id));
 
     if (response.statusCode == 200) {
@@ -49,7 +65,20 @@ class SongRepositoryFirebase extends SongRepository {
       final Map<String, dynamic> songData =
           data as Map<String, dynamic>;
 
-      return SongDto.fromJson(id, songData);
+      final Song song = SongDto.fromJson(id, songData);
+
+      if (_cachedSongs != null) {
+        final int index = _cachedSongs!.indexWhere((item) => item.id == id);
+        final List<Song> updatedSongs = List<Song>.from(_cachedSongs!);
+        if (index == -1) {
+          updatedSongs.add(song);
+        } else {
+          updatedSongs[index] = song;
+        }
+        _cachedSongs = updatedSongs;
+      }
+
+      return song;
     } else {
       throw Exception('Failed to load song (status: ${response.statusCode})');
     }
@@ -76,6 +105,23 @@ class SongRepositoryFirebase extends SongRepository {
 
       if (updateResponse.statusCode != 200) {
         throw Exception('Failed to update likes');
+      }
+
+      if (_cachedSongs != null) {
+        final int index = _cachedSongs!.indexWhere((song) => song.id == id);
+        if (index != -1) {
+          final Song likedSong = _cachedSongs![index];
+          final List<Song> updatedSongs = List<Song>.from(_cachedSongs!);
+          updatedSongs[index] = Song(
+            id: likedSong.id,
+            title: likedSong.title,
+            artistId: likedSong.artistId,
+            duration: likedSong.duration,
+            imageUrl: likedSong.imageUrl,
+            likes: likedSong.likes + 1,
+          );
+          _cachedSongs = updatedSongs;
+        }
       }
     } else {
       throw Exception('Song not found (status: ${response.statusCode})');

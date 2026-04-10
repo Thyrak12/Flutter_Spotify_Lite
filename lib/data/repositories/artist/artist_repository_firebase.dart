@@ -7,6 +7,8 @@ import '../../dtos/artist_dto.dart';
 import 'artist_repository.dart';
 
 class ArtistRepositoryFirebase implements ArtistRepository {
+  List<Artist>? _cachedArtists;
+
   final Uri artistsUri = Uri.https(
     'thyrak-test-default-rtdb.firebaseio.com',
     '/artists.json',
@@ -23,7 +25,11 @@ class ArtistRepositoryFirebase implements ArtistRepository {
   }
 
   @override
-  Future<List<Artist>> fetchArtists() async {
+  Future<List<Artist>> fetchArtists({bool forceFetch = false}) async {
+    if (!forceFetch && _cachedArtists != null) {
+      return _cachedArtists!;
+    }
+
     final Map<String, dynamic> artistJson = await _fetchArtistsJson();
 
     final List<Artist> result = [];
@@ -31,11 +37,20 @@ class ArtistRepositoryFirebase implements ArtistRepository {
       result.add(ArtistDto.fromJson(entry.key, entry.value));
     }
 
+    _cachedArtists = result;
     return result;
   }
 
   @override
-  Future<Artist?> fetchArtistById(String id) async {
+  Future<Artist?> fetchArtistById(String id, {bool forceFetch = false}) async {
+    if (!forceFetch && _cachedArtists != null) {
+      for (final Artist artist in _cachedArtists!) {
+        if (artist.id == id) {
+          return artist;
+        }
+      }
+    }
+
     final Map<String, dynamic> artistJson = await _fetchArtistsJson();
     final dynamic artistData = artistJson[id];
 
@@ -43,6 +58,19 @@ class ArtistRepositoryFirebase implements ArtistRepository {
       return null;
     }
 
-    return ArtistDto.fromJson(id, artistData);
+    final Artist artist = ArtistDto.fromJson(id, artistData);
+
+    if (_cachedArtists != null) {
+      final int index = _cachedArtists!.indexWhere((item) => item.id == id);
+      final List<Artist> updatedArtists = List<Artist>.from(_cachedArtists!);
+      if (index == -1) {
+        updatedArtists.add(artist);
+      } else {
+        updatedArtists[index] = artist;
+      }
+      _cachedArtists = updatedArtists;
+    }
+
+    return artist;
   }
 }
