@@ -42,13 +42,14 @@ class LibraryViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1- Fetch songs
-      List<Song> songs = await songRepository.fetchSongs(forceFetch: forceFetch);
+      List<Song> songs = await songRepository.fetchSongs(
+        forceFetch: forceFetch,
+      );
 
-      // 2- Fethc artist
-      List<Artist> artists = await artistRepository.fetchArtists(forceFetch: forceFetch);
+      List<Artist> artists = await artistRepository.fetchArtists(
+        forceFetch: forceFetch,
+      );
 
-      // 3- Create the mapping artistid-> artist
       Map<String, Artist> mapArtist = {};
       for (Artist artist in artists) {
         mapArtist[artist.id] = artist;
@@ -64,7 +65,6 @@ class LibraryViewModel extends ChangeNotifier {
 
       this.data = AsyncValue.success(data);
     } catch (e) {
-      // 3- Fetch is unsucessfull
       data = AsyncValue.error(e);
     }
     notifyListeners();
@@ -83,7 +83,9 @@ class LibraryViewModel extends ChangeNotifier {
     }
 
     final List<LibraryItemData> currentData = data.data!;
-    final int songIndex = currentData.indexWhere((item) => item.song.id == song.id);
+    final int songIndex = currentData.indexWhere(
+      (item) => item.song.id == song.id,
+    );
 
     if (songIndex == -1) {
       return;
@@ -101,18 +103,16 @@ class LibraryViewModel extends ChangeNotifier {
       likes: currentSong.likes + 1,
     );
 
-    final List<LibraryItemData> updatedData = List<LibraryItemData>.from(currentData);
-    updatedData[songIndex] = LibraryItemData(song: likedSong, artist: currentItem.artist);
+    final List<LibraryItemData> updatedData = List<LibraryItemData>.from(
+      currentData,
+    );
+    updatedData[songIndex] = LibraryItemData(
+      song: likedSong,
+      artist: currentItem.artist,
+    );
     data = AsyncValue.success(updatedData);
     notifyListeners();
 
-    try {
-      await songRepository.likeSong(song.id);
-    } catch (_) {
-      final List<LibraryItemData> revertedData = List<LibraryItemData>.from(updatedData);
-      revertedData[songIndex] = LibraryItemData(song: currentSong, artist: currentItem.artist);
-      data = AsyncValue.success(revertedData);
-      notifyListeners();
-    }
+    await songRepository.likeSong(song.id);
   }
 }

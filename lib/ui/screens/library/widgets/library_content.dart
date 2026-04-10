@@ -11,7 +11,6 @@ class LibraryContent extends StatelessWidget {
 
   Widget _buildScrollableState(Widget child) {
     return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
       children: [
         SizedBox(
           height: 420,
